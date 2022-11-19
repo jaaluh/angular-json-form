@@ -1,0 +1,24 @@
+.sidenav-content {
+  height: calc(100% - 2rem);
+  padding: 1rem;
+  background-color: #333;
+  color: whitesmoke;
+
+  h3 {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  a {
+    user-select: none;
+    color: whitesmoke;
+    display: block;
+    text-decoration: none;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+
+    &:hover {
+      color: goldenrod;
+    }
+  }
+}

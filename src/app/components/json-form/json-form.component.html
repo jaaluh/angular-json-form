@@ -3,33 +3,33 @@
   <ng-container *ngFor="let f of jsonForm.fields">
     <ng-container [ngSwitch]="f.type">
 
-      <!------------------------------------ input field ---------------------------------->
-      <div class="jsonform-input" *ngSwitchCase="'input'" [hidden]="hiddenFields[f.name]">
-        <mat-form-field>
-          <mat-label>{{ f.label }}</mat-label>
-          <input matInput placeholder="{{asJsonFormInputField(f).placeholder}}" [formControlName]="f.name">
-        </mat-form-field>
-      </div>
-      <!------------------------------------ input field end ---------------------------------->
+      <app-json-form-input-field 
+        *ngSwitchCase="'input'"
+        [hidden]="hiddenFields[f.name]"
+        [canEdit]="isAllowedToEditField(f.name)"
+        [jsonField]="asJsonFormInputField(f)"
+        (onUpdateField)="handleUpdateField($event, f)"
+      ></app-json-form-input-field>
 
-
-      <!------------------------------------ select field ---------------------------------->
-      <div class="jsonform-select" *ngSwitchCase="'select'" [hidden]="hiddenFields[f.name]">
-        <mat-form-field appearance="fill">
-          <mat-label>{{ f.label }}</mat-label>
-          <mat-select [formControlName]="f.name">
-            <mat-option *ngFor="let opt of asJsonFormSelectField(f).options" [value]="opt.value">
-              {{opt.viewValue}}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-      <!------------------------------------ select field end ---------------------------------->
-
+      <app-json-form-select-field
+        *ngSwitchCase="'select'"
+        [hidden]="hiddenFields[f.name]"
+        [canEdit]="isAllowedToEditField(f.name)"
+        [jsonField]="asJsonFormSelectField(f)"
+        (onUpdateField)="handleUpdateField($event, f)"
+      ></app-json-form-select-field>
 
     </ng-container>
   </ng-container>
 
-  <button mat-raised-button color="primary" type="submit">Submit</button>
+  <button mat-raised-button color="primary" type="submit" style="margin-top: 1rem">Submit</button>
 
 </form>
+
+<div style="margin-top: 5rem;">
+  <button *ngIf="!editMode && isAllowedToEditForm" mat-raised-button color="primary" (click)="toggleEditMode()">Edit form <mat-icon>edit</mat-icon></button>
+
+  <button *ngIf="editMode && isAllowedToEditForm" mat-raised-button color="primary" (click)="toggleEditMode()">Exit edit mode <mat-icon>done</mat-icon></button>
+
+</div>
+

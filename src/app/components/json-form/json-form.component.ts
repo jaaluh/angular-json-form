@@ -17,6 +17,8 @@ const propertyByString = function (o: any, s: string) {
   return o
 }
 
+export const fieldTypes: JsonFormFieldType[] = ['input', 'select']
+
 export type JsonFormFieldType = 'input' | 'select'
 
 export type ComparisonContext = 'this' | 'form'
@@ -32,11 +34,12 @@ export interface JsonFormFieldCondition {
 }
 
 export interface JsonFormField {
-  type: JsonFormFieldType
-  name: string
-  label: string
-  defaultValue: string | number | boolean
-  conditions?: JsonFormFieldCondition[]
+  type: JsonFormFieldType;
+  name: string;
+  label: string;
+  defaultValue: string | number | boolean;
+  conditions?: JsonFormFieldCondition[];
+  editable?: JsonFormEditableFieldProperty[];
 }
 
 export interface JsonFormInputField extends JsonFormField {
@@ -62,6 +65,12 @@ export interface JsonFormSubmitEvent {
   data: { [key: string]: any }
 }
 
+export type JsonFormFieldEditSubmitEvent = {
+  data: { [key in JsonFormEditableFieldProperty]: any }
+}
+
+export type JsonFormEditableFieldProperty = 'label' | 'type' | 'conditions' | 'options'
+
 @Component({
   selector: 'app-json-form',
   templateUrl: './json-form.component.html',
@@ -69,11 +78,13 @@ export interface JsonFormSubmitEvent {
 })
 export class JsonFormComponent implements OnDestroy, OnInit {
   @Input() jsonForm!: JsonForm
+  @Input() isAllowedToEditForm = false
   @Output() onSubmit = new EventEmitter<JsonFormSubmitEvent>()
   protected form!: UntypedFormGroup
   protected subs: Subscription[] = []
   protected hiddenFields: { [key: string]: boolean } = {}
   protected disabledFields: { [key: string]: boolean } = {}
+  protected editMode = false
 
   constructor(private fb: UntypedFormBuilder) {
     this.form = this.fb.group({})
@@ -197,5 +208,35 @@ export class JsonFormComponent implements OnDestroy, OnInit {
 
   protected handleSubmit() {
     this.onSubmit.emit({ data: this.formValue })
+  }
+
+  protected isAllowedToEditField(name: string): boolean {
+    if (!this.editMode) return false
+    const field = this.jsonForm.fields.find(f => f.name === name)
+    if (!field) return false
+
+    return !!(field.editable && field.editable.length > 0)
+  }
+
+  protected toggleEditMode() {
+    this.editMode = !this.editMode
+  }
+
+  protected handleUpdateField(event: JsonFormFieldEditSubmitEvent, field: JsonFormField) {
+    const { data } = event;
+    for (const editedFieldName in data) {
+      const value = data[<JsonFormEditableFieldProperty>editedFieldName];
+      if (editedFieldName === 'label' && value && value !== field.label) field.label = value
+      if (editedFieldName === 'type' && value && fieldTypes.includes(value)) field.type = value
+      if (editedFieldName === 'options' && value) {
+        const arr = value.split('|');
+        const selecteField = <JsonFormSelectField>field
+        selecteField.options = []
+        for (const optString of arr) {
+          const [value, viewValue] = optString.split(',')
+          selecteField.options.push({ value, viewValue })
+        }
+      }
+    }
   }
 }

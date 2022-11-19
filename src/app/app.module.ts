@@ -9,24 +9,52 @@ import { ReactiveFormsModule } from '@angular/forms'
 import { MatFormFieldModule } from '@angular/material/form-field'
 import { MatButtonModule } from '@angular/material/button'
 import { MatSelectModule } from '@angular/material/select'
+import { MatSidenavModule } from '@angular/material/sidenav'
 import { OrderFormComponent } from './forms/order-form/order-form.component'
 import { JsonFormComponent } from './components/json-form/json-form.component'
+import { SidenavContentComponent } from './components/sidenav-content/sidenav-content.component'
+import { MatIconModule } from '@angular/material/icon'
+import { HomeComponent } from './pages/home/home.component'
+import { MaterialsComponent } from './pages/materials/materials.component'
+import { OrdersComponent } from './pages/orders/orders.component'
+import { CompaniesComponent } from './pages/companies/companies.component'
+import { NotFoundComponent } from './pages/not-found/not-found.component'
+import { JsonFormInputFieldComponent } from './components/json-form/json-form-input-field/json-form-input-field.component'
+import { JsonFormFieldComponent } from './components/json-form/json-form-field/json-form-field.component'
+import { JsonFormSelectFieldComponent } from './components/json-form/json-form-select-field/json-form-select-field.component'
+import { JsonFormFieldEditorComponent } from './components/json-form/json-form-field-editor/json-form-field-editor.component'
+import { MatCardModule } from '@angular/material/card'
+import { MatExpansionModule } from '@angular/material/expansion'
 
 @NgModule({
   declarations: [
     AppComponent,
     OrderFormComponent,
-    JsonFormComponent
+    JsonFormComponent,
+    SidenavContentComponent,
+    HomeComponent,
+    MaterialsComponent,
+    OrdersComponent,
+    CompaniesComponent,
+    NotFoundComponent,
+    JsonFormInputFieldComponent,
+    JsonFormFieldComponent,
+    JsonFormSelectFieldComponent,
+    JsonFormFieldEditorComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     ReactiveFormsModule,
     BrowserAnimationsModule,
+    MatIconModule,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatSelectModule
+    MatSelectModule,
+    MatSidenavModule,
+    MatCardModule,
+    MatExpansionModule
   ],
   providers: [],
   bootstrap: [AppComponent]

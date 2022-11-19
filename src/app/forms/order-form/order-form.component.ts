@@ -29,7 +29,8 @@ const descriptionField: JsonFormInputField = {
       value: 'hide-and-disable-desc',
       actions: ['disable', 'hide']
     },
-  ]
+  ],
+  editable: ['label', 'type', 'conditions', 'options'],
 }
 
 const productionOrderIdField: JsonFormInputField = {
@@ -57,7 +58,8 @@ const carrierField: JsonFormSelectField = {
   options: [
     { value: 1, viewValue: 'Carrier one' },
     { value: 2, viewValue: 'Carrier two' },
-  ]
+  ],
+  editable: ['options']
 }
 
 const customerField: JsonFormSelectField = {

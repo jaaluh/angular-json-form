@@ -1,0 +1,44 @@
+<mat-accordion class="json-form-field-editor">
+  <form [formGroup]="form" (ngSubmit)="handleSubmit()">
+
+    <mat-expansion-panel expanded="true">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          Field settings for {{jsonField.name}}
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+
+      <div>
+        <mat-form-field *ngIf="isPropertyEditable('label')">
+          <mat-label>Label</mat-label>
+          <input matInput placeholder="label" formControlName="label">
+        </mat-form-field>
+      </div>
+
+      <div>
+        <mat-form-field *ngIf="isPropertyEditable('type')">
+          <mat-label>Type</mat-label>
+          <mat-select formControlName="type">
+            <mat-option *ngFor="let type of fieldTypes" [value]="type">
+              {{ type }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div *ngIf="jsonField.type === 'select'">
+        <mat-form-field>
+          <mat-label>Options</mat-label>
+          <input matInput placeholder="value,viewValue|value2,viewValue2" formControlName="options">
+        </mat-form-field>
+      </div>
+
+      <div>
+        <button mat-raised-button color="warn" (click)="handleCancelClick()">Cancel <mat-icon>cancel</mat-icon></button>
+        <button mat-raised-button color="primary" type="submit">Save <mat-icon>done</mat-icon></button>
+      </div>
+    </mat-expansion-panel>
+
+  </form>
+
+</mat-accordion>
