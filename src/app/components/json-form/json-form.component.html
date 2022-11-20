@@ -1,23 +1,19 @@
 <form [formGroup]="form" *ngIf="jsonForm" (ngSubmit)="handleSubmit()">
 
-  <ng-container *ngFor="let f of jsonForm.fields">
+  <ng-container *ngFor="let f of visibleFields">
     <ng-container [ngSwitch]="f.type">
 
-      <app-json-form-input-field 
-        *ngSwitchCase="'input'"
-        [hidden]="hiddenFields[f.name]"
-        [canEdit]="isAllowedToEditField(f.name)"
-        [jsonField]="asJsonFormInputField(f)"
-        (onUpdateField)="handleUpdateField($event, f)"
-      ></app-json-form-input-field>
+      <div class="json-form-field-wrapper" [ngClass]="{'edit-mode': editMode && !hiddenFields[f.name]}" *ngSwitchCase="'input'" [hidden]="hiddenFields[f.name]">
+        <app-json-form-input-field
+          [canEdit]="isAllowedToEditField(f.name)" [jsonField]="asJsonFormInputField(f)"
+          (onUpdateField)="handleUpdateField($event, f)"></app-json-form-input-field>
+      </div>
 
-      <app-json-form-select-field
-        *ngSwitchCase="'select'"
-        [hidden]="hiddenFields[f.name]"
-        [canEdit]="isAllowedToEditField(f.name)"
-        [jsonField]="asJsonFormSelectField(f)"
-        (onUpdateField)="handleUpdateField($event, f)"
-      ></app-json-form-select-field>
+      <div class="json-form-field-wrapper" [ngClass]="{'edit-mode': editMode && !hiddenFields[f.name]}" *ngSwitchCase="'select'" [hidden]="hiddenFields[f.name]">
+        <app-json-form-select-field
+          [canEdit]="isAllowedToEditField(f.name)" [jsonField]="asJsonFormSelectField(f)"
+          (onUpdateField)="handleUpdateField($event, f)"></app-json-form-select-field>
+      </div>
 
     </ng-container>
   </ng-container>
@@ -27,9 +23,22 @@
 </form>
 
 <div style="margin-top: 5rem;">
-  <button *ngIf="!editMode && isAllowedToEditForm" mat-raised-button color="primary" (click)="toggleEditMode()">Edit form <mat-icon>edit</mat-icon></button>
-
-  <button *ngIf="editMode && isAllowedToEditForm" mat-raised-button color="primary" (click)="toggleEditMode()">Exit edit mode <mat-icon>done</mat-icon></button>
-
+  <button *ngIf="!editMode && isAllowedToEditForm" mat-raised-button color="primary" (click)="toggleEditMode()">Edit
+    form <mat-icon>edit</mat-icon>
+  </button>
 </div>
+ 
+<form [formGroup]="importJsonForm" (ngSubmit)="importJson()" *ngIf="editMode && isAllowedToEditForm" style="margin-top: 1rem; margin-bottom: 1rem">
+  <h3>Import / Export JSON</h3>
+  <div *ngIf="editMode && isAllowedToEditForm" style="margin-top: 1rem">
+    <textarea cols="60" rows="20" [value]="formValueAsJson()" formControlName="json">
+    </textarea>
+    <button *ngIf="editMode && isAllowedToEditForm" mat-raised-button color="accent" type="submit">Import JSON <mat-icon>done</mat-icon></button>
+  </div>
+</form>
 
+
+
+<button *ngIf="editMode && isAllowedToEditForm" mat-raised-button color="primary" (click)="toggleEditMode()">Exit edit
+  mode <mat-icon>done</mat-icon>
+</button>

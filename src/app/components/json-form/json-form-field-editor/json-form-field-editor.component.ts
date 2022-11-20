@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core'
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
-import { JsonFormEditableFieldProperty, JsonFormField, JsonFormFieldEditSubmitEvent, JsonFormInputField, JsonFormSelectField, JsonFormSubmitEvent } from '../json-form.component'
+import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
+import { JsonFormEditableFieldProperty, JsonFormField, JsonFormFieldCondition, JsonFormFieldEditSubmitEvent, JsonFormInputField, JsonFormSelectField, JsonFormSubmitEvent } from '../json-form.component'
 import { fieldTypes } from '../json-form.component'
 
 @Component({
@@ -17,7 +17,7 @@ export class JsonFormFieldEditorComponent implements OnInit, OnChanges {
 
   constructor(private fb: FormBuilder) {
     this.form = this.fb.group({
-      options: '',
+      options: new FormControl([]),
     })
   }
 
@@ -29,6 +29,12 @@ export class JsonFormFieldEditorComponent implements OnInit, OnChanges {
       }
       else if (editableProperty === 'type') {
         this.form.addControl('type', new FormControl(this.jsonField.type, { validators: [Validators.required] }), { emitEvent: false })
+      }
+      else if (editableProperty === 'conditions') {
+        this.form.addControl('conditions', this.fb.array([]))
+        for (const c of this.fieldConditions) {
+          this.createCondition(c)
+        }
       }
     }
     if (this.jsonField.type === 'select') {
@@ -42,9 +48,26 @@ export class JsonFormFieldEditorComponent implements OnInit, OnChanges {
     }
   }
 
+  protected createCondition(condition?: JsonFormFieldCondition) {
+    if (!condition) {
+      condition = { actions: [], context: 'form', operator: '=', property: '', value: ''}
+    }
+    this.formConditions.push(this.fb.group({
+      context: condition.context || 'form',
+      operator: [condition.operator, Validators.required],
+      property: [condition.property, Validators.required],
+      value: condition.value,
+      actions: new FormControl(condition.actions)
+    }))
+  }
+
+  protected deleteCondition(index: number) {
+    this.formConditions.removeAt(index);
+  }
+
   protected setOptionsFormValue() {
-    const optsString = this.getSelectOptionsAsCommaSeparatedString(<JsonFormSelectField>this.jsonField);
-    this.form.get('options')?.setValue(optsString)
+    const enabled = (<JsonFormSelectField>this.jsonField).options.filter(f => !f.disabled).map(f => f.value)
+    this.form.get('options')?.setValue(enabled)
   }
 
   protected get editableFields() {
@@ -64,20 +87,27 @@ export class JsonFormFieldEditorComponent implements OnInit, OnChanges {
     this.onCancel.emit(true)
   }
 
-  protected getSelectOptionsAsCommaSeparatedString(field: JsonFormSelectField) {
-    const opts = field.options || []
-    let optsString = ''
-    for (const o of opts) {
-      optsString= `${optsString}${optsString? '|' : ''}${o.value},${o.viewValue}`
-    }
-    return optsString;
-  }
-
   protected asJsonFormInputField(field: JsonFormField): JsonFormInputField {
     return <JsonFormInputField>field
   }
 
   protected asJsonFormSelectField(field: JsonFormField): JsonFormSelectField {
     return <JsonFormSelectField>field
+  }
+
+  protected get fieldConditions() {
+    return this.jsonField.conditions || []
+  }
+
+  protected get formConditions() {
+    return this.form.get('conditions') as FormArray
+  }
+
+  protected conditionActions(index: number) {
+    return this.formConditions.at(index).get('actions')
+  }
+
+  protected get conditionProperties() {
+    return this.jsonField.conditionProperties || []
   }
 }

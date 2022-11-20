@@ -25,6 +25,8 @@ import { JsonFormSelectFieldComponent } from './components/json-form/json-form-s
 import { JsonFormFieldEditorComponent } from './components/json-form/json-form-field-editor/json-form-field-editor.component'
 import { MatCardModule } from '@angular/material/card'
 import { MatExpansionModule } from '@angular/material/expansion'
+import { MatRadioModule } from '@angular/material/radio'
+import { MatListModule } from '@angular/material/list'
 
 @NgModule({
   declarations: [
@@ -54,7 +56,9 @@ import { MatExpansionModule } from '@angular/material/expansion'
     MatSelectModule,
     MatSidenavModule,
     MatCardModule,
-    MatExpansionModule
+    MatExpansionModule,
+    MatRadioModule,
+    MatListModule
   ],
   providers: [],
   bootstrap: [AppComponent]

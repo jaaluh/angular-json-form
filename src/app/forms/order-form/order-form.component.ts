@@ -7,30 +7,8 @@ const descriptionField: JsonFormInputField = {
   label: 'Description',
   defaultValue: '',
   placeholder: 'Order description',
-  conditions: [
-    {
-      context: 'form',
-      property: 'productionOrderId',
-      operator: '=',
-      value: 'hide-desc',
-      actions: ['hide']
-    },
-    {
-      context: 'form',
-      property: 'productionOrderId',
-      operator: '=',
-      value: 'disable-desc',
-      actions: ['disable']
-    },
-    {
-      context: 'form',
-      property: 'productionOrderId',
-      operator: '=',
-      value: 'hide-and-disable-desc',
-      actions: ['disable', 'hide']
-    },
-  ],
-  editable: ['label', 'type', 'conditions', 'options'],
+  conditions: [],
+  editable: ['label', 'conditions'],
 }
 
 const productionOrderIdField: JsonFormInputField = {
@@ -39,15 +17,8 @@ const productionOrderIdField: JsonFormInputField = {
   label: 'ID',
   defaultValue: '',
   placeholder: 'Order ID',
-  conditions: [
-    {
-      context: 'form',
-      property: 'carrierId',
-      value: 2,
-      actions: ['disable'],
-      operator: '='
-    }
-  ]
+  conditions: [],
+  editable: ['label', 'conditions']
 }
 
 const carrierField: JsonFormSelectField = {
@@ -59,7 +30,7 @@ const carrierField: JsonFormSelectField = {
     { value: 1, viewValue: 'Carrier one' },
     { value: 2, viewValue: 'Carrier two' },
   ],
-  editable: ['options']
+  editable: ['label', 'conditions']
 }
 
 const customerField: JsonFormSelectField = {
@@ -70,7 +41,8 @@ const customerField: JsonFormSelectField = {
   options: [
     { value: 1, viewValue: 'Customer one' },
     { value: 2, viewValue: 'Customer two' },
-  ]
+  ],
+  editable: ['label', 'conditions']
 }
 
 const materialField: JsonFormSelectField = {
@@ -81,7 +53,8 @@ const materialField: JsonFormSelectField = {
   options: [
     { value: 1, viewValue: 'Material one' },
     { value: 2, viewValue: 'Material two' },
-  ]
+  ],
+  editable: ['label', 'conditions']
 }
 
 const sourceMaterialField: JsonFormSelectField = {
@@ -93,27 +66,21 @@ const sourceMaterialField: JsonFormSelectField = {
     { value: 1, viewValue: 'Material one' },
     { value: 2, viewValue: 'Material two' },
   ],
-  conditions: [
-    {
-      actions: ['hide'],
-      context: 'form',
-      operator: '!',
-      property: 'type',
-      value: 'internalTransfer'
-    }
-  ]
+  conditions: [],
+  editable: ['label', 'conditions']
 }
 
 const typeField: JsonFormSelectField = {
   type: 'select',
   name: 'type',
   label: 'Tyyppi',
-  defaultValue: 1,
+  defaultValue: 'outgoing',
   options: [
-    { value: 'outgoing', viewValue: 'Incoming' },
-    { value: 'incoming', viewValue: 'Outgoing' },
+    { value: 'incoming', viewValue: 'Incoming' },
+    { value: 'outgoing', viewValue: 'Outgoing' },
     { value: 'internalTransfer', viewValue: 'Internal transfer' },
-  ]
+  ],
+  editable: ['label', 'conditions', 'options']
 }
 
 const orderForm: JsonForm = {
@@ -138,8 +105,7 @@ export class OrderFormComponent implements OnInit {
 
   constructor() { }
 
-  ngOnInit(): void {
-  }
+  ngOnInit(): void {}
 
   onSubmit(event: JsonFormSubmitEvent) {
     const { data } = event

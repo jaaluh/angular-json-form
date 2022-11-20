@@ -2,3 +2,16 @@
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+.display-none {
+  display: none;
+}
+
+.json-form-field-wrapper.edit-mode {
+  .json-form-field.edit-mode {
+    border-radius: 0.2rem;
+    background-color: #ddd;
+    padding: 1rem;
+    margin-bottom: 2rem; 
+  }
+  
+}

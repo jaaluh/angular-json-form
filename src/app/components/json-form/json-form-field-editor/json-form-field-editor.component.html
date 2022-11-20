@@ -1,44 +1,107 @@
-<mat-accordion class="json-form-field-editor">
-  <form [formGroup]="form" (ngSubmit)="handleSubmit()">
+<div class="json-form-field-editor">
 
-    <mat-expansion-panel expanded="true">
-      <mat-expansion-panel-header>
-        <mat-panel-title>
-          Field settings for {{jsonField.name}}
-        </mat-panel-title>
-      </mat-expansion-panel-header>
+  <mat-accordion>
+    <form [formGroup]="form" (ngSubmit)="handleSubmit()">
 
-      <div>
-        <mat-form-field *ngIf="isPropertyEditable('label')">
-          <mat-label>Label</mat-label>
-          <input matInput placeholder="label" formControlName="label">
-        </mat-form-field>
-      </div>
+      <mat-expansion-panel expanded="true">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            Field settings for {{jsonField.name}}
+          </mat-panel-title>
+        </mat-expansion-panel-header>
 
-      <div>
-        <mat-form-field *ngIf="isPropertyEditable('type')">
-          <mat-label>Type</mat-label>
-          <mat-select formControlName="type">
-            <mat-option *ngFor="let type of fieldTypes" [value]="type">
-              {{ type }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
+        <!-------------------------- Label ---------------------------------->
+        <div>
+          <mat-form-field *ngIf="isPropertyEditable('label')">
+            <mat-label>Label</mat-label>
+            <input matInput placeholder="label" formControlName="label">
+          </mat-form-field>
+        </div>
+        <!-------------------------- Label end ------------------------------>
 
-      <div *ngIf="jsonField.type === 'select'">
-        <mat-form-field>
-          <mat-label>Options</mat-label>
-          <input matInput placeholder="value,viewValue|value2,viewValue2" formControlName="options">
-        </mat-form-field>
-      </div>
 
-      <div>
-        <button mat-raised-button color="warn" (click)="handleCancelClick()">Cancel <mat-icon>cancel</mat-icon></button>
+        <!-------------------------- Type ----------------------------------->
+        <div>
+          <mat-form-field *ngIf="isPropertyEditable('type')">
+            <mat-label>Type</mat-label>
+            <mat-select formControlName="type">
+              <mat-option *ngFor="let type of fieldTypes" [value]="type">
+                {{ type }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <!-------------------------- Type end-------------------------------->
+
+
+        <!-------------------------- Options -------------------------------->
+        <div *ngIf="jsonField.type === 'select' && isPropertyEditable('options')">
+          <mat-selection-list formControlName="options">
+            <mat-label>Options</mat-label>
+            <mat-list-option *ngFor="let opt of asJsonFormSelectField(jsonField).options" [value]="opt.value">
+              {{opt.viewValue}}
+            </mat-list-option>
+          </mat-selection-list>
+        </div>
+        <!-------------------------- Options end ---------------------------->
+
+
+        <!-------------------------- Conditions ----------------------------->
+        <div *ngIf="isPropertyEditable('conditions')" formArrayName="conditions" class="json-form-conditions">
+          <h4 style="margin-top: 1.5rem; margin-bottom: 1rem;;">Conditions</h4>
+
+          <button mat-raised-button color="primary" style="margin-bottom: 1rem" (click)="createCondition()" type="button">Add condition <mat-icon>add</mat-icon></button>
+
+          
+          <div *ngFor="let c of formConditions.controls; let cIndex = index;" [formGroupName]="cIndex" class="json-form-condition">
+            
+          <mat-expansion-panel expanded="false">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                Condition {{cIndex + 1}}
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <button mat-raised-button color="warn" style="margin-bottom: 2rem" (click)="deleteCondition(cIndex)" type="button">Delete condition</button>
+
+              <mat-form-field>
+                <mat-label>Property</mat-label>
+                <mat-select formControlName="property">
+                  <mat-option *ngFor="let prop of conditionProperties" [value]="prop.property">{{ prop.property}}</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field>
+                <mat-label>Value</mat-label>
+                <input matInput placeholder="value" formControlName="value">
+              </mat-form-field>
+
+              <mat-form-field>
+                <mat-label>Operator</mat-label>
+                <mat-select formControlName="operator">
+                  <mat-option value="=">Equals</mat-option>
+                  <mat-option value="!">Not equals</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-selection-list formControlName="actions">
+                <mat-label>Actions</mat-label>
+                <mat-list-option value="hide">Hide</mat-list-option>
+                <mat-list-option value="disable">Disable</mat-list-option>
+              </mat-selection-list>
+
+
+            </mat-expansion-panel>
+          </div>
+        </div>
+        <!-------------------------- Conditions end -------------------------->
+
+      </mat-expansion-panel>
+
+      <div style="margin-top: 1rem">
+        <button mat-raised-button color="warn" (click)="handleCancelClick()" type="button">Cancel <mat-icon>cancel</mat-icon></button>
         <button mat-raised-button color="primary" type="submit">Save <mat-icon>done</mat-icon></button>
       </div>
-    </mat-expansion-panel>
+    </form>
 
-  </form>
-
-</mat-accordion>
+  </mat-accordion>
+</div>

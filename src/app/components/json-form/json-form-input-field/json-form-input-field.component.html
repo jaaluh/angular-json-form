@@ -1,16 +1,18 @@
-<div class="jsonform-input" [hidden]="hidden" [formGroup]="form">
-  <mat-form-field>
-    <mat-label>{{ jsonField.label }}</mat-label>
-    <input matInput placeholder="{{jsonField.placeholder}}" [formControlName]="jsonField.name">
-  </mat-form-field>
-  <button mat-icon-button *ngIf="canEdit && !editMode" color="accent" (click)="toggleEditMode()">
-    <mat-icon>edit</mat-icon>
-  </button>
-</div>
-
-<app-json-form-field-editor 
+<div class="json-form-field" [ngClass]="{'edit-mode': editMode }" [hidden]="hidden">
+  <div [formGroup]="form">
+    <mat-form-field>
+      <mat-label>{{ jsonField.label }}</mat-label>
+      <input matInput placeholder="{{jsonField.placeholder}}" [formControlName]="jsonField.name">
+    </mat-form-field>
+    <button mat-icon-button *ngIf="canEdit && !editMode" color="accent" (click)="toggleEditMode()">
+      <mat-icon>edit</mat-icon>
+    </button>
+  </div>
+  
+  <app-json-form-field-editor 
   *ngIf="canEdit && editMode"
   [jsonField]="jsonField"
   (onCancel)="toggleEditMode()"
   (onSubmit)="handleUpdateField($event)"
-></app-json-form-field-editor>
+  ></app-json-form-field-editor>
+</div>

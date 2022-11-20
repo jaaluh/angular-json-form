@@ -13,4 +13,8 @@ export class JsonFormSelectFieldComponent extends JsonFormFieldComponent impleme
   ngOnInit(): void {
     if (!this.jsonField) throw new Error('Input: jsonField is required')
   }
+
+  get enabledOptions() {
+    return this.jsonField.options.filter(o => !o.disabled)
+  }
 }

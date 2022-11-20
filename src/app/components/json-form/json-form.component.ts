@@ -21,16 +21,23 @@ export const fieldTypes: JsonFormFieldType[] = ['input', 'select']
 
 export type JsonFormFieldType = 'input' | 'select'
 
-export type ComparisonContext = 'this' | 'form'
+export type JsonFormComparisonContext = 'this' | 'form'
 
-export type ComparisonAction = 'hide' | 'disable'
+export type JsonFormComparisonAction = 'hide' | 'disable'
+
+export type JsonFormEditableFieldProperty = 'label' | 'type' | 'conditions' | 'options'
+
+export interface JsonFormConditionProperty {
+  context: JsonFormComparisonContext;
+  property: string;
+}
 
 export interface JsonFormFieldCondition {
-  context: ComparisonContext
+  context: JsonFormComparisonContext
   property: string
   value: any
   operator: '!' | '='
-  actions: ComparisonAction[]
+  actions: JsonFormComparisonAction[]
 }
 
 export interface JsonFormField {
@@ -39,6 +46,7 @@ export interface JsonFormField {
   label: string;
   defaultValue: string | number | boolean;
   conditions?: JsonFormFieldCondition[];
+  conditionProperties?: JsonFormConditionProperty[];
   editable?: JsonFormEditableFieldProperty[];
 }
 
@@ -48,8 +56,9 @@ export interface JsonFormInputField extends JsonFormField {
 }
 
 export interface JsonFormOption {
-  value: string | number
-  viewValue: string
+  value: string | number;
+  viewValue: string;
+  disabled?: boolean
 }
 
 export interface JsonFormSelectField extends JsonFormField {
@@ -69,8 +78,6 @@ export type JsonFormFieldEditSubmitEvent = {
   data: { [key in JsonFormEditableFieldProperty]: any }
 }
 
-export type JsonFormEditableFieldProperty = 'label' | 'type' | 'conditions' | 'options'
-
 @Component({
   selector: 'app-json-form',
   templateUrl: './json-form.component.html',
@@ -81,10 +88,12 @@ export class JsonFormComponent implements OnDestroy, OnInit {
   @Input() isAllowedToEditForm = false
   @Output() onSubmit = new EventEmitter<JsonFormSubmitEvent>()
   protected form!: UntypedFormGroup
+  protected importJsonForm!: UntypedFormGroup
   protected subs: Subscription[] = []
   protected hiddenFields: { [key: string]: boolean } = {}
   protected disabledFields: { [key: string]: boolean } = {}
   protected editMode = false
+  protected valueChangeSub: Subscription | undefined
 
   constructor(private fb: UntypedFormBuilder) {
     this.form = this.fb.group({})
@@ -92,15 +101,22 @@ export class JsonFormComponent implements OnDestroy, OnInit {
 
   ngOnInit() {
     if (!this.jsonForm) throw new Error('input required: jsonForm')
-    this.buildForm(this.jsonForm)
-    this.updateHiddenAndDisabledFields(this.jsonForm.fields)
-    this.startListeningChanges()
+    this.init()
   }
 
   ngOnDestroy() {
     for (const sub of this.subs) {
       sub.unsubscribe()
     }
+    this.valueChangeSub?.unsubscribe()
+  }
+
+  protected init() {
+    this.addConditionProperties()
+    this.buildForm(this.jsonForm)
+    this.updateHiddenAndDisabledFields(this.jsonForm.fields)
+    this.importJsonForm = this.fb.group({ json: new UntypedFormControl(this.formValueAsJson()) })
+    this.startListeningChanges()
   }
 
   // ******************************************* Public API *********************************************************
@@ -114,15 +130,27 @@ export class JsonFormComponent implements OnDestroy, OnInit {
   }
   // ******************************************** Public API End ******************************************************
 
+  protected addConditionProperties() {
+    const conditionProperties = this.jsonForm.fields.map(f => f.name)
+    for (const f of this.jsonForm.fields) {
+      f.conditionProperties = f.conditionProperties || []
+      for (const p of conditionProperties) {
+        f.conditionProperties.push({ context: 'form', property: p })
+      }
+    }
+  }
+
   protected buildForm(jsonForm: JsonForm) {
     this.addControlsForFields(jsonForm.fields)
   }
 
   protected startListeningChanges() {
-    const sub = this.form.valueChanges.subscribe(() => {
+    if (this.valueChangeSub) {
+      this.valueChangeSub.unsubscribe()
+    }
+    this.valueChangeSub = this.form.valueChanges.subscribe(() => {
       this.updateForm()
     })
-    this.subs.push(sub)
   }
 
   protected addControlsForFields(fields: JsonFormField[]) {
@@ -133,11 +161,15 @@ export class JsonFormComponent implements OnDestroy, OnInit {
   }
 
   protected addInputControl(field: JsonFormInputField) {
-    this.form.addControl(field.name, new UntypedFormControl(field.defaultValue), { emitEvent: false })
+    if (!this.form.get(field.name)) {
+      this.form.addControl(field.name, new UntypedFormControl(field.defaultValue), { emitEvent: false })
+    }
   }
 
   protected addSelectControl(field: JsonFormSelectField) {
-    this.form.addControl(field.name, new UntypedFormControl(field.defaultValue), { emitEvent: false })
+    if (!this.form.get(field.name)) {
+      this.form.addControl(field.name, new UntypedFormControl(field.defaultValue), { emitEvent: false })
+    }
   }
 
   protected updateForm() {
@@ -166,7 +198,7 @@ export class JsonFormComponent implements OnDestroy, OnInit {
     }
   }
 
-  protected checkFormFieldCondition(conditions: JsonFormFieldCondition[] | undefined, action: ComparisonAction) {
+  protected checkFormFieldCondition(conditions: JsonFormFieldCondition[] | undefined, action: JsonFormComparisonAction) {
     if (!conditions || !conditions.length) return false
 
     for (const c of conditions) {
@@ -188,7 +220,7 @@ export class JsonFormComponent implements OnDestroy, OnInit {
     return false
   }
 
-  protected getComparisonContext(context: ComparisonContext) {
+  protected getComparisonContext(context: JsonFormComparisonContext) {
     if (context === 'this') {
       return this
     }
@@ -229,14 +261,32 @@ export class JsonFormComponent implements OnDestroy, OnInit {
       if (editedFieldName === 'label' && value && value !== field.label) field.label = value
       if (editedFieldName === 'type' && value && fieldTypes.includes(value)) field.type = value
       if (editedFieldName === 'options' && value) {
-        const arr = value.split('|');
-        const selecteField = <JsonFormSelectField>field
-        selecteField.options = []
-        for (const optString of arr) {
-          const [value, viewValue] = optString.split(',')
-          selecteField.options.push({ value, viewValue })
+        const options = (<JsonFormSelectField>field).options || []
+        for (const o of options) {
+          if (!value.includes(o.value)) o.disabled = true
+          else o.disabled = false
         }
       }
+      if (editedFieldName === 'conditions' && value) field.conditions = value
+    }
+  }
+
+  protected get visibleFields() {
+    return this.jsonForm.fields.filter(f => !this.hiddenFields[f.name])
+  }
+
+  protected formValueAsJson() {
+    return JSON.stringify(this.jsonForm, null, 2)
+  }
+
+  protected importJson() {
+    try {
+      const value = JSON.parse(this.importJsonForm.get('json')?.value)
+      this.jsonForm = value;
+      this.init()
+    }
+    catch(err) {
+      console.log('error importing json', err)
     }
   }
 }
