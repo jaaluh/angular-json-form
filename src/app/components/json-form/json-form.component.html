@@ -33,7 +33,9 @@
   <div *ngIf="editMode && isAllowedToEditForm" style="margin-top: 1rem">
     <textarea cols="60" rows="20" [value]="formValueAsJson()" formControlName="json">
     </textarea>
-    <button *ngIf="editMode && isAllowedToEditForm" mat-raised-button color="accent" type="submit">Import JSON <mat-icon>done</mat-icon></button>
+    <div>
+      <button *ngIf="editMode && isAllowedToEditForm" mat-raised-button color="accent" type="submit">Import JSON <mat-icon>done</mat-icon></button>
+    </div>
   </div>
 </form>
 
